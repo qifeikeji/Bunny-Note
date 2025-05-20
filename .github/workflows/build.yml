@@ -41,17 +41,15 @@ jobs:
           python3 -m aqt list-qt linux desktop --modules 6.6.3 gcc_64 || echo "No modules available"
 
       - name: Setup Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.6.3'
-          arch: 'gcc_64'
-          dir: '${{ github.workspace }}/Qt'
-          modules: 'qtcharts qtwebengine'
+        run: |
+          python3 -m aqt install-qt linux desktop 6.6.3 gcc_64 \
+            --outputdir ${{ github.workspace }}/Qt \
+            --modules qtcharts qtwebengine qtwebenginecore qtwebchannel qtpositioning qtlocation qtmultimedia qtnetworkauth qtsvg qttools qttranslations
 
       - name: Configure CMake
         run: |
           cmake -B build -S . -G Ninja \
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/Qt/Qt/6.6.3/gcc_64" \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/Qt/6.6.3/gcc_64" \
             -DCMAKE_BUILD_TYPE=Release \
             -DQT_DEBUG_FIND_PACKAGE=ON
 
