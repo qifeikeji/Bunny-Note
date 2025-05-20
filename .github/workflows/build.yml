@@ -23,6 +23,7 @@ jobs:
           sudo apt-get install -y zip
           sudo apt-get install -y python3-pip
           sudo apt-get install -y libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xrm-dev libxcb-util-dev libxcb-xinput-dev libxcb-xtest0-dev
+          sudo apt-get install -y libxkbcommon-dev libvulkan-dev libcmark-dev
 
       - name: Install aqtinstall
         run: |
@@ -51,7 +52,8 @@ jobs:
           cmake -B build -S . -G Ninja \
             -DCMAKE_PREFIX_PATH="${{ github.workspace }}/Qt/6.5.3/gcc_64" \
             -DCMAKE_BUILD_TYPE=Release \
-            -DQT_DEBUG_FIND_PACKAGE=ON
+            -DQT_DEBUG_FIND_PACKAGE=ON \
+            -DCMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders=TRUE
 
       - name: Build
         run: cmake --build build --config Release
