@@ -27,15 +27,21 @@ jobs:
         run: |
           python3 -m pip install aqtinstall
 
-      - name: List available Qt modules
+      - name: List available Qt versions
         run: |
-          python3 -m aqt list-qt linux desktop --modules 6.8.0 gcc_64
+          python3 -m aqt list-qt linux desktop
+
+      - name: List available architectures
+        run: |
+          python3 -m aqt list-qt linux desktop --arch 6.8.0
 
       - name: Setup Qt
-        run: |
-          python3 -m aqt install-qt linux desktop 6.8.0 gcc_64 \
-            --outputdir ${{ github.workspace }}/Qt \
-            --modules qtcharts qtwebengine
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.0'
+          arch: 'x64'
+          dir: '${{ github.workspace }}/Qt'
+          modules: 'qtcharts qtwebengine'
 
       - name: Configure CMake
         run: |
