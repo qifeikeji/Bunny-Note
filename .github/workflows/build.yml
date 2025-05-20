@@ -29,29 +29,28 @@ jobs:
 
       - name: List available Qt versions
         run: |
-          python3 -m aqt list-qt linux desktop --base https://mirrors.tuna.tsinghua.edu.cn/qt
+          python3 -m aqt list-qt linux desktop
 
-      - name: List available architectures for Qt 6.7.3
+      - name: List available architectures for Qt 6.6.3
         run: |
-          python3 -m aqt list-qt linux desktop --arch 6.7.3 --base https://mirrors.tuna.tsinghua.edu.cn/qt
+          python3 -m aqt list-qt linux desktop --arch 6.6.3
 
-      - name: List available modules for Qt 6.7.3 gcc_64
+      - name: List available modules for Qt 6.6.3 gcc_64
         run: |
-          python3 -m aqt list-qt linux desktop --modules 6.7.3 gcc_64 --base https://mirrors.tuna.tsinghua.edu.cn/qt || echo "No modules available"
+          python3 -m aqt list-qt linux desktop --modules 6.6.3 gcc_64 || echo "No modules available"
 
       - name: Setup Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.7.3'
+          version: '6.6.3'
           arch: 'gcc_64'
           dir: '${{ github.workspace }}/Qt'
           modules: 'qtcharts qtwebengine'
-          mirror: 'https://mirrors.tuna.tsinghua.edu.cn/qt'
 
       - name: Configure CMake
         run: |
           cmake -B build -S . -G Ninja \
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/Qt/6.7.3/gcc_64" \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/Qt/6.6.3/gcc_64" \
             -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
