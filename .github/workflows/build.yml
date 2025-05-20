@@ -21,14 +21,17 @@ jobs:
           sudo apt-get install -y build-essential cmake ninja-build
           sudo apt-get install -y libgl1-mesa-dev
           sudo apt-get install -y zip
+          sudo apt-get install -y python3-pip
+
+      - name: Install aqtinstall
+        run: |
+          python3 -m pip install aqtinstall
 
       - name: Setup Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.8.0'
-          arch: 'x64'
-          dir: '${{ github.workspace }}/Qt'
-          modules: 'qtcharts qtwebengine'
+        run: |
+          python3 -m aqt install-qt linux desktop 6.8.0 gcc_64 \
+            --outputdir ${{ github.workspace }}/Qt \
+            --modules qtcharts qtwebengine qtbase qtdeclarative qtquickcontrols2 qtquickcontrols2impl qtwebchannel qtpositioning qtlocation qtmultimedia qtnetworkauth qtsvg qttools qttranslations
 
       - name: Configure CMake
         run: |
