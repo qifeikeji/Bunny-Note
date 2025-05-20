@@ -25,6 +25,7 @@ jobs:
           sudo apt-get install -y libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xrm-dev libxcb-util-dev libxcb-xinput-dev libxcb-xtest0-dev
           sudo apt-get install -y libxkbcommon-dev libvulkan-dev libcmark-dev
           sudo apt-get install -y patchelf
+          sudo apt-get install -y libxcb-cursor0
 
       - name: Install aqtinstall
         run: |
@@ -78,6 +79,9 @@ jobs:
           # 复制 cmark 库
           find /usr/lib -name "libcmark*.so*" -exec cp {} package/lib/ \;
           
+          # 复制 xcb-cursor 库
+          find /usr/lib -name "libxcb-cursor.so*" -exec cp {} package/lib/ \;
+          
           # 复制 Qt 插件
           mkdir -p package/plugins
           cp -r ${{ github.workspace }}/Qt/6.5.3/gcc_64/plugins/* package/plugins/
@@ -96,6 +100,10 @@ jobs:
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
           export LD_LIBRARY_PATH="$SCRIPT_DIR/lib:$LD_LIBRARY_PATH"
           export QT_PLUGIN_PATH="$SCRIPT_DIR/plugins"
+          export QT_DEBUG_PLUGINS=1
+          export QT_QPA_PLATFORM=xcb
+          export QT_QPA_PLATFORMTHEME=gtk2
+          export QT_STYLE_OVERRIDE=gtk2
           "$SCRIPT_DIR/BunnyNote" "$@"' > run.sh
           chmod +x run.sh
           
