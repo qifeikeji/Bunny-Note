@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,8 +72,8 @@ jobs:
           # 复制 Qt 依赖
           ldd build/BunnyNote | grep "Qt" | awk '{print $3}' | xargs -I{} cp {} package/lib/
           
-          # 复制系统依赖
-          ldd build/BunnyNote | grep -v "Qt" | grep -v "linux-vdso.so.1" | awk '{print $3}' | xargs -I{} cp {} package/lib/
+          # 复制系统依赖，排除核心系统库
+          ldd build/BunnyNote | grep -v "Qt" | grep -v "linux-vdso.so.1" | grep -v "libc.so.6" | grep -v "libm.so.6" | grep -v "libpthread.so.0" | grep -v "libdl.so.2" | grep -v "librt.so.1" | grep -v "libgcc_s.so.1" | awk '{print $3}' | xargs -I{} cp {} package/lib/
           
           # 复制 cmark 库
           find /usr/lib -name "libcmark*.so*" -exec cp {} package/lib/ \;
