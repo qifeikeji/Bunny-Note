@@ -1,0 +1,68 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build
+          sudo apt-get install -y libgl1-mesa-dev
+          sudo apt-get install -y zip
+
+      - name: Setup Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.0'
+          arch: 'x64'
+          dir: '${{ github.workspace }}/Qt'
+          modules: 'qtcharts qtwebengine'
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . -G Ninja \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/Qt/6.8.0/gcc_64" \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Collect dependencies
+        run: |
+          mkdir -p package
+          cp build/BunnyNote package/
+          cp -r lib package/
+          cp wyw.ico package/
+          
+          # 复制 Qt 依赖
+          ldd build/BunnyNote | grep "Qt" | awk '{print $3}' | xargs -I{} cp {} package/
+          
+          # 创建启动脚本
+          echo '#!/bin/bash
+          SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+          export LD_LIBRARY_PATH="$SCRIPT_DIR:$LD_LIBRARY_PATH"
+          "$SCRIPT_DIR/BunnyNote" "$@"' > package/run.sh
+          chmod +x package/run.sh
+
+      - name: Create zip package
+        run: |
+          cd package
+          zip -r ../BunnyNote-portable.zip *
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BunnyNote-portable
+          path: BunnyNote-portable.zip 
