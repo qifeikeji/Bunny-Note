@@ -24,6 +24,7 @@ jobs:
           sudo apt-get install -y python3-pip
           sudo apt-get install -y libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xrm-dev libxcb-util-dev libxcb-xinput-dev libxcb-xtest0-dev
           sudo apt-get install -y libxkbcommon-dev libvulkan-dev libcmark-dev
+          sudo apt-get install -y patchelf
 
       - name: Install aqtinstall
         run: |
@@ -77,15 +78,24 @@ jobs:
           # 复制 cmark 库
           find /usr/lib -name "libcmark*.so*" -exec cp {} package/lib/ \;
           
+          # 修复动态库路径
+          cd package
+          for lib in lib/*.so*; do
+            if [ -f "$lib" ]; then
+              patchelf --set-rpath '$ORIGIN' "$lib"
+            fi
+          done
+          patchelf --set-rpath '$ORIGIN/lib' BunnyNote
+          
           # 创建启动脚本
           echo '#!/bin/bash
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
           export LD_LIBRARY_PATH="$SCRIPT_DIR/lib:$LD_LIBRARY_PATH"
-          "$SCRIPT_DIR/BunnyNote" "$@"' > package/run.sh
-          chmod +x package/run.sh
+          "$SCRIPT_DIR/BunnyNote" "$@"' > run.sh
+          chmod +x run.sh
           
           # 创建 README
-          printf "BunnyNote 便携版\n\n使用说明：\n1. 解压后直接运行 run.sh 启动程序\n2. 如果遇到权限问题，请执行：chmod +x run.sh\n3. 如果遇到库文件问题，请确保 run.sh 有执行权限\n" > package/README.txt
+          printf "BunnyNote 便携版\n\n使用说明：\n1. 解压后直接运行 run.sh 启动程序\n2. 如果遇到权限问题，请执行：chmod +x run.sh\n3. 如果遇到库文件问题，请确保 run.sh 有执行权限\n" > README.txt
 
       - name: Create zip package
         run: |
